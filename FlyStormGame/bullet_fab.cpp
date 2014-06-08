@@ -32,7 +32,7 @@ BulletFabric::BulletFabric(IDirect3DDevice9 * d3ddev) {
 	HRESULT hr;
 	
 	//hr = D3DXCreateTextureFromFile(d3ddev, L"gameresources/bullet.jpg", &texture);
-
+	
 	hr = D3DXCreateTextureFromFileExA(l_d3ddev, //device
                              "gameresources/bullet.jpg",        //file name
                              D3DX_DEFAULT,      //width
@@ -47,7 +47,7 @@ BulletFabric::BulletFabric(IDirect3DDevice9 * d3ddev) {
                              NULL,              //source info
                              NULL,              //pallette
                              &texture);    //texture object
-
+	
 	//hr = D3DXCreateTextureFromFile(d3ddev, L"gameresources/radiation_box.tga", &texture);
 
 	if (FAILED(hr)) {
@@ -77,13 +77,29 @@ BulletFabric::BulletFabric(IDirect3DDevice9 * d3ddev) {
 	squareBullet->Lock(0, vbSize, &lock, 0);
 	memcpy(lock, rawVertices, vbSize);
 	squareBullet->Unlock();
+
+	D3DCAPS9 devCaps;
+ 	hr = l_d3ddev->GetDeviceCaps(&devCaps);
+	if (FAILED(hr)) {
+		maxLights = 8;
+	} else {
+		maxLights = devCaps.MaxActiveLights;
+	}
 }
 
 HRESULT BulletFabric::Draw()
 {
-	l_d3ddev->SetRenderState(D3DRS_LIGHTING, FALSE);
-	l_d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	l_d3ddev->SetRenderState( D3DRS_SRCBLEND , D3DBLEND_SRCALPHA );
+	DWORD LightingState, SrcBlendState, DstBlendState, AlphaState;
+	//save states
+	l_d3ddev->GetRenderState( D3DRS_LIGHTING, &LightingState);
+	l_d3ddev->GetRenderState( D3DRS_ALPHABLENDENABLE, &AlphaState);
+	l_d3ddev->GetRenderState( D3DRS_SRCBLEND, &SrcBlendState);
+	l_d3ddev->GetRenderState( D3DRS_DESTBLEND, &DstBlendState);
+
+	//set states
+	l_d3ddev->SetRenderState( D3DRS_LIGHTING, FALSE);
+	l_d3ddev->SetRenderState( D3DRS_ALPHABLENDENABLE, TRUE);
+	l_d3ddev->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
 	l_d3ddev->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA) ;
 
 	l_d3ddev->SetTexture(0, texture);
@@ -92,22 +108,58 @@ HRESULT BulletFabric::Draw()
 	D3DXMATRIX m_Rot;
 	D3DXMatrixRotationQuaternion(&m_Rot, &localRotation);
 
-	for(std::deque<Bullet *>::iterator iter = bulletList.begin(); iter != bulletList.end(); iter++)  {
+	int ind = 0;
+	for(std::deque<Bullet *>::iterator iter = bulletList.begin(); iter != bulletList.end(); iter++, ind++)  {
 		D3DXMATRIX matWorld;
 		D3DXMatrixTranslation( &matWorld, (*iter)->worldPosition.x, (*iter)->worldPosition.y, (*iter)->worldPosition.z);
 		D3DXMatrixMultiply(&matWorld, &m_Rot, &matWorld);
 
+		//change bullet light position
+		D3DLIGHT9 bulletLight;
+		l_d3ddev->GetLight(ind, &bulletLight);
+		D3DXVECTOR3 newlightPos;
+		D3DXVec3TransformCoord(&newlightPos, (D3DXVECTOR3 *)&bulletLight.Position, &matWorld);
+		bulletLight.Position = newlightPos;
+		l_d3ddev->SetLight(ind, &bulletLight);
+
+		//draw texture
 		l_d3ddev->SetStreamSource( 0, squareBullet, 0, sizeof(float) * 5 );
 		l_d3ddev->SetTransform( D3DTS_WORLD, &matWorld );
 		l_d3ddev->DrawPrimitive( D3DPT_TRIANGLESTRIP, 0, 2);
 	}
-	l_d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-	l_d3ddev->SetRenderState(D3DRS_LIGHTING, TRUE);
+	
+	//restore states
+	l_d3ddev->SetRenderState( D3DRS_LIGHTING, LightingState);
+	l_d3ddev->SetRenderState( D3DRS_ALPHABLENDENABLE, AlphaState);
+	l_d3ddev->SetRenderState( D3DRS_SRCBLEND, SrcBlendState);
+	l_d3ddev->SetRenderState( D3DRS_DESTBLEND, DstBlendState);
+
 	return S_OK;
 }
 
 void BulletFabric::AddBullet(D3DXQUATERNION startRotation, D3DXVECTOR3 startPos) {
+
+	
 	bulletList.push_back(new Bullet(startPos, startRotation));
+
+	if (bulletList.size() == maxLights)
+		bulletList.pop_front();
+
+	D3DLIGHT9 bulletLight;
+	ZeroMemory( &bulletLight, sizeof(D3DLIGHT9) );
+	bulletLight.Type       = D3DLIGHT_POINT;
+	bulletLight.Position = startPos;
+	bulletLight.Diffuse.r  = 1.0f;
+	bulletLight.Diffuse.g  = 0.1f;
+	bulletLight.Diffuse.b  = 0.1f;
+
+	bulletLight.Attenuation0 = 0.0f;    // no constant inverse attenuation
+    bulletLight.Attenuation1 = 0.225f;    // only .125 inverse attenuation
+    bulletLight.Attenuation2 = 0.0f;    // no square inverse attenuation
+	bulletLight.Range      = 200.0f;
+	
+	l_d3ddev->SetLight( bulletList.size() - 1, &bulletLight );
+	l_d3ddev->LightEnable( bulletList.size() - 1, TRUE );
 }
 
 void BulletFabric::setRotationBullets(D3DXQUATERNION rotQuat) {

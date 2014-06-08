@@ -15,16 +15,12 @@ stSceneClass::stSceneClass(IDirect3DDevice9 * d3ddev)
 	Bullets = new BulletFabric(d3ddev);
 
 	//set render states
-	 // d3ddev->SetRenderState(D3DRS_LIGHTING, TRUE);
 	d3ddev->SetRenderState(D3DRS_ZENABLE, TRUE);
 	d3ddev->SetRenderState(D3DRS_LIGHTING, TRUE);
-	/*
-	d3ddev->SetRenderState(D3DRS_COLORVERTEX, FALSE);
-	d3ddev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE( 0.1f, 0.1f, 0.1f, 1.0f ));
-	*/
-	d3ddev->SetRenderState(D3DRS_DIFFUSEMATERIALSOURCE, D3DMCS_MATERIAL);
+	d3ddev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE( 1, 1, 1, 1 ));
 	
 	//init simple lighting
+	/*
 	ZeroMemory( &light, sizeof(D3DLIGHT9) );
 	light.Type       = D3DLIGHT_DIRECTIONAL;
 	
@@ -39,6 +35,7 @@ stSceneClass::stSceneClass(IDirect3DDevice9 * d3ddev)
 	
 	d3ddev->SetLight( 0, &light );
 	d3ddev->LightEnable( 0, TRUE );
+	*/
 }
 
 HRESULT stSceneClass::PrepareObjects(IDirect3DDevice9 * d3ddev)
@@ -95,7 +92,8 @@ void stSceneClass::KeyboardEvent(CInput * keybState)
 	// add bullet to scene
 	if (keybState->KeyPressed(CInput::SPACE) && (GetTickCount() - lastFireTime > 500) )
 	{
-		Bullets->AddBullet(Ship->localRotation, Ship->GetWorldPos());
+		//make bullet forwarded regarded ship
+		Bullets->AddBullet(Ship->localRotation, Ship->GetWorldPos() + Ship->GetMoveVector()*0.6f );
 		lastFireTime= GetTickCount();
 	}
 	 
@@ -120,6 +118,7 @@ void stSceneClass::KeyboardEvent(CInput * keybState)
 		Camera->setRotation(Ship->localRotation);
 	}
 
+	//rotate bullet according point of view
 	Bullets->setRotationBullets(Ship->localRotation);
 
 }

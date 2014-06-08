@@ -1,8 +1,6 @@
 #include "spaceship.h"
 
-SpaceshipClass::SpaceshipClass()
-{
-}
+SpaceshipClass::SpaceshipClass() {}
 
 SpaceshipClass::SpaceshipClass(IDirect3DDevice9 * d3ddev)
 {
@@ -115,6 +113,9 @@ void SpaceshipClass::moveForward(float speed)
 HRESULT SpaceshipClass::Draw(IDirect3DDevice9 * d3ddev)
 {
 	HRESULT hr = S_OK;
+	DWORD AmbientColorState;
+	d3ddev->GetRenderState(D3DRS_AMBIENT, &AmbientColorState);
+	d3ddev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE( 0.5f, 0.5f, 0.5f, 1 ));
 
 	D3DXMATRIX matWorld, m_Scale, m_Rotation, m_Translation;
 
@@ -135,5 +136,8 @@ HRESULT SpaceshipClass::Draw(IDirect3DDevice9 * d3ddev)
 		d3ddev->SetMaterial(&meshMaterials[i]);
 		MeshShip->DrawSubset(i);
 	}
+
+	d3ddev->SetRenderState(D3DRS_AMBIENT, AmbientColorState);
+
 	return S_OK;
 }
