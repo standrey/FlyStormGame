@@ -40,6 +40,7 @@ private:
 	IDirect3DVertexBuffer9*				squareBullet;
 	IDirect3DVertexDeclaration9*		bulletVertexDecl;
 	std::deque<Bullet *>				bulletList;
+	D3DLIGHT9							bulletLight;
 	IDirect3DDevice9 *					l_d3ddev;
 	int									maxLights;
 };

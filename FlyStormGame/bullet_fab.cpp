@@ -85,6 +85,17 @@ BulletFabric::BulletFabric(IDirect3DDevice9 * d3ddev) {
 	} else {
 		maxLights = devCaps.MaxActiveLights;
 	}
+	
+	//init light
+	ZeroMemory( &bulletLight, sizeof(D3DLIGHT9) );
+	bulletLight.Type       = D3DLIGHT_POINT;
+	bulletLight.Diffuse.r  = 1.0f;
+	bulletLight.Diffuse.g  = 0.1f;
+	bulletLight.Diffuse.b  = 0.1f;
+	bulletLight.Attenuation0 = 0.0f;    // no constant inverse attenuation
+	bulletLight.Attenuation1 = 0.225f;    // only .125 inverse attenuation
+	bulletLight.Attenuation2 = 0.0f;    // no square inverse attenuation
+	bulletLight.Range      = 200.0f;
 }
 
 HRESULT BulletFabric::Draw()
@@ -115,12 +126,9 @@ HRESULT BulletFabric::Draw()
 		D3DXMatrixMultiply(&matWorld, &m_Rot, &matWorld);
 
 		//change bullet light position
-		D3DLIGHT9 bulletLight;
-		l_d3ddev->GetLight(ind, &bulletLight);
-		D3DXVECTOR3 newlightPos;
-		D3DXVec3TransformCoord(&newlightPos, (D3DXVECTOR3 *)&bulletLight.Position, &matWorld);
-		bulletLight.Position = newlightPos;
-		l_d3ddev->SetLight(ind, &bulletLight);
+		bulletLight.Position = (*iter)->worldPosition;
+		l_d3ddev->SetLight(ind, &bulletLight );
+		l_d3ddev->LightEnable(ind, true);
 
 		//draw texture
 		l_d3ddev->SetStreamSource( 0, squareBullet, 0, sizeof(float) * 5 );
@@ -138,28 +146,10 @@ HRESULT BulletFabric::Draw()
 }
 
 void BulletFabric::AddBullet(D3DXQUATERNION startRotation, D3DXVECTOR3 startPos) {
-
-	
 	bulletList.push_back(new Bullet(startPos, startRotation));
-
+	//if bullets with lights
 	if (bulletList.size() == maxLights)
-		bulletList.pop_front();
-
-	D3DLIGHT9 bulletLight;
-	ZeroMemory( &bulletLight, sizeof(D3DLIGHT9) );
-	bulletLight.Type       = D3DLIGHT_POINT;
-	bulletLight.Position = startPos;
-	bulletLight.Diffuse.r  = 1.0f;
-	bulletLight.Diffuse.g  = 0.1f;
-	bulletLight.Diffuse.b  = 0.1f;
-
-	bulletLight.Attenuation0 = 0.0f;    // no constant inverse attenuation
-    bulletLight.Attenuation1 = 0.225f;    // only .125 inverse attenuation
-    bulletLight.Attenuation2 = 0.0f;    // no square inverse attenuation
-	bulletLight.Range      = 200.0f;
-	
-	l_d3ddev->SetLight( bulletList.size() - 1, &bulletLight );
-	l_d3ddev->LightEnable( bulletList.size() - 1, TRUE );
+		RemoveFirstBullet();
 }
 
 void BulletFabric::setRotationBullets(D3DXQUATERNION rotQuat) {
@@ -172,6 +162,9 @@ void BulletFabric::RemoveFirstBullet() {
 	Bullet * firstBullet = *(bulletList.begin());
 	delete firstBullet;
 	bulletList.pop_front();
+	
+	if (bulletList.size() > 0)
+		l_d3ddev->LightEnable(bulletList.size() - 1, false);
 }
 
 void BulletFabric::moveForward(float speed) {
