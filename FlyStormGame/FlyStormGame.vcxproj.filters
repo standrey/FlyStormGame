@@ -60,6 +60,9 @@
     <ClCompile Include="bullet_fab.cpp">
       <Filter>Source Files\game object</Filter>
     </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="global.h">
@@ -91,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="bullet_fab.h">
       <Filter>Header Files\game objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

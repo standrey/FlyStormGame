@@ -74,6 +74,7 @@
     <ClCompile Include="CInput.cpp" />
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="directx.cpp" />
+    <ClCompile Include="Engine.cpp" />
     <ClCompile Include="main_new.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="quaternion.cpp" />
@@ -86,6 +87,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="CInput.h" />
     <ClInclude Include="debug.h" />
+    <ClInclude Include="Engine.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="quaternion.h" />
