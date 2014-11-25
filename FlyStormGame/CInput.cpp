@@ -82,13 +82,13 @@ bool CInput::KeyPressed(CInput::MyKeys pressedKey)
 	switch (pressedKey)
 	{
 	case CInput::DOWN:
-			return bool(m_KeyBuffer[DIK_DOWN] & 0x80);
+		return bool(m_KeyBuffer[DIK_S] & 0x80);
 	case CInput::UP:
-			return bool(m_KeyBuffer[DIK_UP] & 0x80);
+		return bool(m_KeyBuffer[DIK_W] & 0x80);
 	case CInput::LEFT:
-			return bool(m_KeyBuffer[DIK_LEFT] & 0x80);
+		return bool(m_KeyBuffer[DIK_A] & 0x80);
 	case CInput::RIGHT:
-			return bool(m_KeyBuffer[DIK_RIGHT] & 0x80);
+		return bool(m_KeyBuffer[DIK_D] & 0x80);
 	case CInput::SPACE:
 			return bool(m_KeyBuffer[DIK_SPACE] & 0x80);
 	}
