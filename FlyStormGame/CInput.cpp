@@ -90,7 +90,7 @@ bool CInput::KeyPressed(CInput::MyKeys pressedKey)
 	case CInput::RIGHT:
 		return bool(m_KeyBuffer[DIK_D] & 0x80);
 	case CInput::SPACE:
-			return bool(m_KeyBuffer[DIK_SPACE] & 0x80);
+		return bool(m_KeyBuffer[DIK_SPACE] & 0x80);
 	}
 }
 
@@ -107,16 +107,16 @@ bool CInput::KeyboardEvent(MSG* msg)
 		m_KeyBuffer[DIK_SPACE] = 0x80;
 		return true;
 	case VK_UP:
-		m_KeyBuffer[DIK_UP] = 0x80;
+		m_KeyBuffer[DIK_W] = 0x80;
 		return true;
 	case VK_DOWN:
-		m_KeyBuffer[DIK_DOWN] = 0x80;
+		m_KeyBuffer[DIK_S] = 0x80;
 		return true;
 	case VK_LEFT:
-		m_KeyBuffer[DIK_LEFT] = 0x80;
+		m_KeyBuffer[DIK_A] = 0x80;
 		return true;
 	case VK_RIGHT:
-		m_KeyBuffer[DIK_RIGHT] = 0x80;
+		m_KeyBuffer[DIK_D] = 0x80;
 		return true;
 	}
 	return false;

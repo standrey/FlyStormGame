@@ -80,6 +80,7 @@
     <ClCompile Include="quaternion.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="spaceship.cpp" />
+    <ClCompile Include="stCollisionDetector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="building.h" />
@@ -93,6 +94,8 @@
     <ClInclude Include="quaternion.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="spaceship.h" />
+    <ClInclude Include="stCollisionDetector.h" />
+    <ClInclude Include="stIGameObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

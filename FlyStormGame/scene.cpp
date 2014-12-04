@@ -1,7 +1,5 @@
 #include "scene.h"
 
-stSceneClass::stSceneClass() {};
-
 stSceneClass::stSceneClass(IDirect3DDevice9 * d3ddev)
 {
 	lastFireTime = GetTickCount();
@@ -12,6 +10,7 @@ stSceneClass::stSceneClass(IDirect3DDevice9 * d3ddev)
 	MapObject = new stMapClass();
 	Camera = new CameraClass();
 	Ship = new SpaceshipClass(d3ddev);
+	m_DynamicObjects.push_back(Ship);
 	Bullets = new BulletFabric(d3ddev);
 
 	//set render states
@@ -19,6 +18,7 @@ stSceneClass::stSceneClass(IDirect3DDevice9 * d3ddev)
 	d3ddev->SetRenderState(D3DRS_LIGHTING, TRUE);
 	d3ddev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE( 1, 1, 1, 1 ));
 	
+	CollisionDetect = std::unique_ptr<stCollisionDetector>(new stCollisionDetector());
 	//init simple lighting
 	/*
 	ZeroMemory( &light, sizeof(D3DLIGHT9) );
@@ -75,7 +75,8 @@ HRESULT stSceneClass::DrawObjects()
 	
 	Ship->Draw(device);
 	Bullets->Draw();
-
+	for (auto i = m_DynamicObjects.begin(); i!= m_DynamicObjects.end(); i++)
+		(*i)->DrawDebug(device);
 	device->EndScene();
     device->Present( NULL, NULL, NULL, NULL );
 	return S_OK;
@@ -143,6 +144,8 @@ void stSceneClass::UpdateScene()
 	//переставляем позицию камеры
 	//относительно мировой системы координат
 	Camera->setPosition(Ship->GetWorldPos());
+
+	//CollisionResolver->CheckAndMark(m_DynamicObjects, m_Terrain, m_Buildings);
 }
 
 stSceneClass::~stSceneClass()
